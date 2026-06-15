@@ -10,6 +10,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 |---------|-----|-----------------|
 | v2.2.0 | [`v2.2.0`](https://github.com/chainguard-actions/boasiHQ-interactive-inputs/tree/v2.2.0) | [`55a66c8`](https://github.com/boasiHQ/interactive-inputs/commit/55a66c85c6e85a0a9c994674e5efe2916c53f109) |
 | v2.3.0 | [`v2.3.0`](https://github.com/chainguard-actions/boasiHQ-interactive-inputs/tree/v2.3.0) | [`b8511c4`](https://github.com/boasiHQ/interactive-inputs/commit/b8511c40fa20d9223f46b70f1a6d2bc4035fe784) |
+| v2.4.0 | [`v2.4.0`](https://github.com/chainguard-actions/boasiHQ-interactive-inputs/tree/v2.4.0) | [`a309145`](https://github.com/boasiHQ/interactive-inputs/commit/a3091457e2a478f90be611c8f7d363f984cdbb3a) |
 
 ## Privacy
 

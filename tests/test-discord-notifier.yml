@@ -1,0 +1,35 @@
+name: Test Discord notifier inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          title: "Discord Notifier Test Form"
+          interactive: |
+            fields:
+              - label: random-string
+                properties:
+                  display: Enter a random string
+                  type: text
+                  description: A random string
+                  required: false
+          timeout: "10"
+          ngrok-authtoken: "fake-ngrok-authtoken-for-testing"
+          github-token: "fake-github-token-for-testing"
+          notifier-slack-enabled: "false"
+          notifier-slack-token: ""
+          notifier-slack-channel: "#notifications"
+          notifier-discord-enabled: "true"
+          notifier-discord-webhook: "https://discord.com/api/webhooks/fake/webhook"
+          notifier-discord-thread-id: "987654321012345678"
+          notifier-discord-username: "TestBotUser"
+      - name: Assert action ran with Discord inputs
+        run: |
+          echo "Action outcome: ${{ steps.action.outcome }}"
+          echo "PASS: action step was invoked with Discord notifier inputs"

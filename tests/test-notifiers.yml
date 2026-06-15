@@ -1,0 +1,44 @@
+name: Test notifier inputs coverage
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          title: "Notifier Test Form"
+          ngrok-authtoken: "fake-ngrok-token-for-testing"
+          github-token: "fake-github-token"
+          interactive: |
+            fields:
+              - label: my-choice
+                properties:
+                  display: Pick one
+                  type: select
+                  choices: ["option-a", "option-b"]
+                  required: false
+          timeout: "30"
+          notifier-slack-enabled: "true"
+          notifier-slack-token: "fake-slack-token"
+          notifier-slack-channel: "#test-channel"
+          notifier-slack-thread-ts: "1234567890.123456"
+          notifier-slack-bot: "test-bot"
+          notifier-discord-enabled: "true"
+          notifier-discord-webhook: "https://discord.com/api/webhooks/fake/webhook"
+          notifier-discord-thread-id: "987654321"
+          notifier-discord-username: "test-discord-user"
+      - name: Assert action was invoked
+        run: |
+          echo "Action outcome: ${{ steps.action.outcome }}"
+          # The action requires real ngrok credentials to succeed.
+          # We verify it was invoked (outcome is either success or failure, not skipped).
+          outcome="${{ steps.action.outcome }}"
+          if [ "$outcome" = "skipped" ]; then
+            echo "FAIL: action was skipped, expected it to be invoked"
+            exit 1
+          fi
+          echo "PASS: action was invoked with outcome=$outcome"

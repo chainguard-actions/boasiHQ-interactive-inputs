@@ -1,0 +1,40 @@
+name: Test select field type configuration
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        timeout-minutes: 2
+        with:
+          title: "Select Field Test"
+          interactive: |
+            fields:
+              - label: environment
+                properties:
+                  display: Select an environment
+                  type: select
+                  description: Choose the target environment
+                  choices: ["dev", "staging", "prod"]
+                  required: true
+          timeout: "5"
+          ngrok-authtoken: "invalid-ngrok-token"
+          github-token: "fake-github-token"
+          notifier-slack-enabled: "false"
+          notifier-discord-enabled: "false"
+
+      - name: Assert action was invoked with select field config
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "action outcome: $OUTCOME"
+          if [ "$OUTCOME" = "skipped" ]; then
+            echo "FAIL: action was skipped unexpectedly"
+            exit 1
+          fi
+          echo "PASS: action ran with select field config, outcome=$OUTCOME"

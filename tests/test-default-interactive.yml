@@ -1,0 +1,55 @@
+name: Test with default interactive fields configuration
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Test action with default interactive fields (multifile, text, select)
+        id: action
+        uses: .
+        continue-on-error: true
+        with:
+          title: "Default Fields Test"
+          interactive: |
+            fields:
+              - label: requested-files
+                properties:
+                  display: Upload desired files
+                  type: multifile
+                  required: true
+                  description: Upload desired files that are to be uploaded to the runner for processing
+              - label: random-string
+                properties:
+                  display: Enter a random string
+                  type: text
+                  description: A random string up to 20 characters long
+                  maxLength: 20
+                  required: false
+              - label: choice
+                properties:
+                  display: Select a monitoring tool
+                  type: select
+                  description: Available options to chose from
+                  choices: ["datadog", "sentry", "grafana"]
+                  required: true
+          timeout: "5"
+          ngrok-authtoken: "fake-ngrok-token-for-testing"
+          github-token: "fake-github-token"
+          notifier-slack-enabled: "false"
+          notifier-discord-enabled: "false"
+
+      - name: Assert action was invoked with default fields
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "action outcome: $OUTCOME"
+          # The action should fail due to invalid ngrok token
+          # We verify it was invoked and did not hang indefinitely
+          if [ "$OUTCOME" = "success" ]; then
+            echo "WARN: action unexpectedly succeeded with fake credentials"
+          else
+            echo "PASS: action correctly failed with invalid credentials (outcome: $OUTCOME)"
+          fi

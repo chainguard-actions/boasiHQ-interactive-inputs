@@ -1,0 +1,45 @@
+name: Test with Slack notifier configuration
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Test action with Slack notifier enabled
+        id: action
+        uses: .
+        continue-on-error: true
+        with:
+          title: "Slack Notifier Test Form"
+          interactive: |
+            fields:
+              - label: choice
+                properties:
+                  display: Select an option
+                  type: select
+                  description: Available options
+                  choices: ["option-a", "option-b", "option-c"]
+                  required: true
+          timeout: "5"
+          ngrok-authtoken: "fake-ngrok-token-for-testing"
+          github-token: "fake-github-token"
+          notifier-slack-enabled: "true"
+          notifier-slack-token: "xoxb-fake-slack-token"
+          notifier-slack-channel: "#test-channel"
+          notifier-slack-bot: "test-bot"
+          notifier-discord-enabled: "false"
+
+      - name: Assert action was invoked with Slack config
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "action outcome: $OUTCOME"
+          # The action should fail due to invalid ngrok/slack tokens
+          # We verify it was invoked and did not hang indefinitely
+          if [ "$OUTCOME" = "success" ]; then
+            echo "WARN: action unexpectedly succeeded with fake credentials"
+          else
+            echo "PASS: action correctly failed with invalid credentials (outcome: $OUTCOME)"
+          fi

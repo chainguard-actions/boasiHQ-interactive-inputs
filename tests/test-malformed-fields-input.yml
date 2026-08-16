@@ -1,0 +1,28 @@
+name: Test malformed interactive fields input error
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run action with malformed fields YAML (expect failure)
+        id: action
+        uses: .
+        continue-on-error: true
+        with:
+          ngrok-authtoken: "fake-ngrok-token-for-testing"
+          github-token: ${{ github.token }}
+          interactive: |
+            this is: not valid
+            fields yaml: [unclosed bracket
+
+      - name: Assert action failed due to malformed fields input
+        run: |
+          echo "outcome: ${{ steps.action.outcome }}"
+          if [ "${{ steps.action.outcome }}" != "failure" ]; then
+            echo "FAIL: expected action to fail when malformed fields YAML is provided"
+            exit 1
+          fi
+          echo "PASS: action correctly failed when malformed interactive fields input was provided"

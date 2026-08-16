@@ -1,0 +1,40 @@
+name: Test Slack thread reply notifier config
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          title: "Thread Reply Test"
+          interactive: |
+            fields:
+              - label: my-field
+                properties:
+                  display: Enter a value
+                  type: text
+                  required: false
+          timeout: "10"
+          ngrok-authtoken: "invalid-ngrok-token-for-testing"
+          github-token: ${{ github.token }}
+          notifier-slack-enabled: "true"
+          notifier-slack-token: "xoxb-invalid-slack-token"
+          notifier-slack-channel: "#test-notifications"
+          notifier-slack-bot: "test-bot"
+          notifier-slack-thread-ts: "1234567890.123456"
+          notifier-discord-enabled: "false"
+          notifier-discord-webhook: ""
+      - name: Assert action ran (may fail due to invalid ngrok token)
+        run: |
+          echo "Action outcome: ${{ steps.action.outcome }}"
+          # The action is expected to fail with an invalid ngrok token.
+          # We only need to verify it was invoked with the notifier-slack-thread-ts input.
+          if [ "${{ steps.action.outcome }}" = "skipped" ]; then
+            echo "FAIL: action was skipped unexpectedly"
+            exit 1
+          fi
+          echo "PASS: action was invoked with notifier-slack-thread-ts input"

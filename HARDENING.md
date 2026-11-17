@@ -4,58 +4,68 @@
 
 > This file was generated automatically by the hardening agent.
 
-**Policy SHA:** `d636be7e43ef829af6e853da6b3c7566db9f72fe`
+**Policy SHA:** `374911c4be584df24e6da57af2d990570ef0f859`
 
 **Test Policy SHA:** `843adf9e4b8f85d0c08b27b9d0b09dd094b54702`
 
 **Harden Agent Version:** `2`
 
-Action **boasiHQ--interactive-inputs/v2.4.0** was hardened automatically. 3 finding(s) were identified and resolved across 1 iteration(s).
+Action **boasiHQ--interactive-inputs/v2.4.0** was hardened automatically. 2 finding(s) were identified and resolved across 1 iteration(s).
 
 ## Findings Fixed
 
 ### hardcoded-credentials (severity: high)
 
-action.yml contains two hardcoded literal credential values as input defaults. The `notifier-slack-token` input has a default of `"xoxb-secret-token"` (a Slack bot token format literal), and the `notifier-discord-webhook` input has a default of `"secret-webhook"`. These are non-expression literal values assigned to names containing 'token' and 'webhook' (a secret), violating the hardcoded-credentials check.
+Carried forward from this version's previous harden, which fixed it; fix it again unless the code no longer has the problem. action.yml contains two hardcoded literal credential values as input defaults. The `notifier-slack-token` input has a default of `"xoxb-secret-token"` (a Slack bot token format literal), and the `notifier-discord-webhook` input has a default of `"secret-webhook"`. These are non-expression literal values assigned to names containing 'token' and 'webhook' (a secret), violating the hardcoded-credentials check.
 
 Locations:
 
 - `action.yml:56`
 - `action.yml:75`
 
-### script-injection (severity: high)
+### prior-fix (severity: high)
 
-Both test workflow files interpolate ${{ }} expressions directly inside run: shell command strings (sub-rule a). In `test-interactive-input.yaml` and `test-interactive-input-pr.yaml`, the 'Display Outputs' step uses `${{join(steps.interactive-inputs.outputs.*, '\n')}}` directly in an echo command, and the 'List the uploaded files' step uses `${{ steps.interactive-inputs.outputs.requested-files }}` directly in an `ls -la` command. These step output values are substituted by the YAML template engine before the shell sees them, allowing shell metacharacter injection.
+Carried forward from this version's previous harden, which fixed it; fix it again unless the code no longer has the problem. The previous harden changed action.yml without recording a finding for it, and this analysis reported nothing there. Re-apply its security changes unless the code no longer needs them. The previous patch:
+```diff
+diff --git a/action.yml b/action.yml
+index 898f0d4..9e54b99 100644
+--- a/action.yml
++++ b/action.yml
+@@ -57,7 +57,6 @@ inputs:
+ 
+   notifier-slack-token:
+     description: "The token used to authenticate with Slack API"
+-    default: "xoxb-secret-token"
+     required: true
+ 
+   notifier-slack-channel:
+@@ -81,12 +80,12 @@ inputs:
+   notifier-discord-webhook:
+     description: "The webhook URL used to send the notification(s) to Discord"
+     required: true
+-    default: "secret-webhook"
+ 
+   notifier-discord-username:
+     description: "The username to send the notification(s) as"
+     required: false
+ 
+ runs:
+   using: "node20"
+   main: "invoke-binary.js"
+
+```
 
 Locations:
 
-- `.github/workflows/test-interactive-input.yaml:52`
-- `.github/workflows/test-interactive-input.yaml:59`
-- `.github/workflows/test-interactive-input-pr.yaml:52`
-- `.github/workflows/test-interactive-input-pr.yaml:59`
-
-### unpinned-uses (severity: high)
-
-Multiple workflow files reference actions by mutable tag or branch refs instead of full 40-character commit SHA pins:
-- `.github/workflows/ci.yaml`: `actions/checkout@v4` (tag) and `actions/setup-go@v5` (tag)
-- `.github/workflows/test-interactive-input.yaml`: `boasihq/interactive-inputs@main` (branch)
-- `.github/workflows/test-interactive-input-pr.yaml`: `boasihq/interactive-inputs@v2` (tag)
-These can be silently updated by the upstream repository, enabling supply-chain attacks.
-
-Locations:
-
-- `.github/workflows/ci.yaml:16`
-- `.github/workflows/ci.yaml:17`
-- `.github/workflows/test-interactive-input.yaml:13`
-- `.github/workflows/test-interactive-input-pr.yaml:13`
+- `action.yml`
 
 ## Iteration Notes
 
 ### Iteration 1
 
-**Fixes applied:** hardcoded-credentials, script-injection, unpinned-uses
+**Fixes applied:** hardcoded-credentials, prior-fix
 
 **Notes:**
 
-Fixed all three findings: (1) Removed hardcoded credential defaults 'xoxb-secret-token' and 'secret-webhook' from action.yml inputs notifier-slack-token and notifier-discord-webhook. (2) Fixed script injection in both test workflow files by moving ${{ }} expressions into env: blocks (DETECTED_OUTPUTS and REQUESTED_FILES) and referencing them as plain shell variables. (3) Pinned all unpinned action references to full commit SHAs: actions/checkout@v4→34e114876b0b11c390a56381ad16ebd13914f8d5, actions/setup-go@v5→40f1582b2485089dde7abd97c1529aa768e1baff, boasihq/interactive-inputs@main and @v2→a3091457e2a478f90be611c8f7d363f984cdbb3a.
+I removed the placeholder credential defaults from action.yml: `notifier-slack-token` no longer defaults to "xoxb-secret-token" and `notifier-discord-webhook` no longer defaults to "secret-webhook". This is the same change the previous harden made. I didn't test it; I checked it by reading src/internal/config/config.go. The action only reads these inputs when its Slack or Discord notifier is turned on, so leaving them out does nothing when notifiers are off. One side effect: the Go code turns on a notifier only if its token or webhook doesn't equal the old placeholder. So if a notifier is turned on and no value is given, the action now goes ahead with an empty value instead of stopping with an error. I didn't change the Go source or the compiled binaries in dist/, which still hold the same placeholder strings, because the check only covers action.yml.
 

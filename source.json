@@ -4,8 +4,13 @@
   "version": "v2.4.0",
   "commit_sha": "a3091457e2a478f90be611c8f7d363f984cdbb3a",
   "url": "https://github.com/boasiHQ/interactive-inputs",
-  "policy_sha": "d636be7e43ef829af6e853da6b3c7566db9f72fe",
+  "policy_sha": "374911c4be584df24e6da57af2d990570ef0f859",
   "test_policy_sha": "843adf9e4b8f85d0c08b27b9d0b09dd094b54702",
   "test_agent_version": "2",
-  "harden_agent_version": "2"
+  "harden_agent_version": "2",
+  "dist_artifact": {
+    "gcs_uri": "gs://patch-actions-node-artifacts/dist-artifacts/boasiHQ/interactive-inputs/v2.4.0/sha256-33fb4fd26a7e18534c475e30785403570e523cc9f1e338b2709b09b6a955ef29.tar.gz",
+    "sha256": "33fb4fd26a7e18534c475e30785403570e523cc9f1e338b2709b09b6a955ef29",
+    "size_bytes": 13880469
+  }
 }
